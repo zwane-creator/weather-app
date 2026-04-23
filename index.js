@@ -1,15 +1,25 @@
 function displayTemperature(response) {
   let temperature = Math.round(response.data.temperature.current);
-
   let tempValueElement = document.querySelector(".temp");
   let cityElement = document.querySelector("#current-city");
+  let descriptionElement = document.querySelector("#description");
+  let humidityElement = document.querySelector("#humidity");
+  let speedElement = document.querySelector("#speed");
+  let timeElement = document.querySelector("#time");
+  let date = new Date(response.data.time * 1000);
+  let iconElement = document.querySelector("#icon");
 
   if (!tempValueElement || !cityElement) {
     console.error("Temperature or city element not found in HTML!");
     return;
   }
 
+  iconElement.innerHTML = `<img src="${response.data.condition.icon_url}" class="icon" />`;
   cityElement.innerHTML = response.data.city;
+  descriptionElement.innerHTML = response.data.condition.description;
+  humidityElement.innerHTML = `${response.data.temperature.humidity}%`;
+  speedElement.innerHTML = `${response.data.wind.speed}km/h`;
+  timeElement.innerHTML = formatDate(date);
   tempValueElement.innerHTML = temperature; // Only the number
 }
 
@@ -29,12 +39,8 @@ function search(event) {
 function formatDate(date) {
   let minutes = date.getMinutes();
   let hours = date.getHours();
-  let day = date.getDay();
 
-  if (minutes < 10) minutes = `0${minutes}`;
-  if (hours < 10) hours = `0${hours}`;
-
-  const days = [
+  let days = [
     "Sunday",
     "Monday",
     "Tuesday",
@@ -44,7 +50,12 @@ function formatDate(date) {
     "Saturday",
   ];
 
-  return `${days[day]} ${hours}:${minutes}`;
+  let day = days[date.getDay()];
+
+  if (minutes < 10) minutes = `0${minutes}`;
+  if (hours < 10) hours = `0${hours}`;
+
+  return `${day} ${hours}:${minutes}`;
 }
 
 // Event listeners
