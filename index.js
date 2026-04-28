@@ -21,6 +21,8 @@ function displayTemperature(response) {
   speedElement.innerHTML = `${response.data.wind.speed}km/h`;
   timeElement.innerHTML = formatDate(date);
   tempValueElement.innerHTML = temperature; // Only the number
+
+  getweatherForecast(response.data.city);
 }
 
 function search(event) {
@@ -58,9 +60,53 @@ function formatDate(date) {
   return `${day} ${hours}:${minutes}`;
 }
 
-// Event listeners
-document.querySelector("#search-form").addEventListener("submit", search);
+function formatDay(timestamp) {
+  let date = new Date(timestamp * 1000);
+  let days = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
+
+  return days[date.getDay()];
+}
+
+function getweatherForecast(city) {
+  let apiKey = "dca402bf6e5cod4bb210fdbta88ea4c3";
+  let apiUrl = `https://api.shecodes.io/weather/v1/forecast?query=${city}&key=${apiKey}&units=metric`;
+  axios.get(apiUrl).then(displayWeatherForecast);
+}
 
 // Show current date on load
-const currentDateElement = document.querySelector("#current-date");
-currentDateElement.innerHTML = formatDate(new Date());
+document.querySelector("#time").innerHTML = formatDate(new Date());
+
+// Inject forecast
+function displayWeatherForecast(response) {
+  console.log(response.data);
+  let weatherForecast = document.querySelector("#weatherForecast");
+
+  let days = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
+  let forecastHTML = "";
+
+  response.data.daily.forEach(function (day, index) {
+    if (index > 0 && index < 6) {
+      forecastHTML =
+        forecastHTML +
+        `
+      <div class="forecast-day">
+      <div class="forecast-date">${formatDay(day.time)}</div>
+      <div><img src="${day.condition.icon_url}" class="forecast-icon" /></div>
+        <div class="forecast-temperatures">
+          <div class="forecast-temperature"><strong>${Math.round(
+            day.temperature.maximum,
+          )}°</strong></div>
+          <div class="forecast-temperature">${Math.round(
+            day.temperature.minimum,
+          )}°</div>
+        </div>
+      </div>
+    `;
+    }
+  });
+
+  weatherForecast.innerHTML = forecastHTML;
+}
+
+// Event listeners
+document.querySelector("#search-form").addEventListener("submit", search);
